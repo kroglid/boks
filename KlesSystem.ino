@@ -1,17 +1,17 @@
-const int trykkPlate = 4;
-const int vibrasjonsMotor = 13;
-const int ansattKasse = 2;
-const int ansattMobile = 12;
+const int trykkPlateKunde = 4;
+const int mottakerVibrasjon = 13;
+const int trykkPlateAnsatt = 2;
+const int mottakerKnapp = 12;
 
-int amStatus;
-int tpStatus;
-int akStatus;
-int forrigeAMStatus = LOW;
-int forrigeTPStatus = LOW;
-int forrigeAKStatus = LOW;
-unsigned long amTid = 0;
-unsigned long tpTid = 0;
-unsigned long akTid = 0;
+int mkStatus;
+int tpkStatus;
+int tpaStatus;
+int forrigemkStatus = LOW;
+int forrigetpkStatus = LOW;
+int forrigetpaStatus = LOW;
+unsigned long mkTid = 0;
+unsigned long tpkTid = 0;
+unsigned long tpaTid = 0;
 unsigned long vmTid = 0;
 
 int vibrasjonsStatus = LOW;
@@ -21,95 +21,68 @@ int vibrasjonsInterval = 500;
 
 unsigned long debounceDelay = 50;
 
-unsigned long trykkPlateDelay = 3000;
+unsigned long trykkPlateKundeDelay = 3000;
 
 void setup() {
-  pinMode(trykkPlate, INPUT);
-  pinMode(vibrasjonsMotor, OUTPUT);
-  pinMode(ansattKasse, INPUT);
-  pinMode(ansattMobile, INPUT);
+  pinMode(trykkPlateKunde, INPUT);
+  pinMode(mottakerVibrasjon, OUTPUT);
+  pinMode(trykkPlateAnsatt, INPUT);
+  pinMode(mottakerKnapp, INPUT);
 
   Serial.begin(9600);
 }
 
-void ansattKnapper(){
-  
-}
-
 void loop() {
-  //ansattMobile knapp
-  int leseAMKnapp = digitalRead(ansattMobile);
+  //Debounce mottakerKnapp
+  int leseAMKnapp = digitalRead(mottakerKnapp);
   
-  if (leseAMKnapp != forrigeAMStatus) {
-    amTid = millis();
+  if (leseAMKnapp != forrigemkStatus) {
+    mkTid = millis();
   }
   
-  if ((millis() - amTid) > debounceDelay) {
-    if (leseAMKnapp != amStatus) {
-      amStatus = leseAMKnapp;
-      if (amStatus == HIGH) {
-        Serial.println("AnsattMobile har blitt klikket");
-        //vibrasjonsStatus == LOW;
-        digitalWrite(vibrasjonsMotor, LOW);
+  if ((millis() - mkTid) > debounceDelay) {
+    if (leseAMKnapp != mkStatus) {
+      mkStatus = leseAMKnapp;
+      if (mkStatus == HIGH) {
+        digitalWrite(mottakerVibrasjon, LOW);
       }
     }
   }
   
-  forrigeAMStatus = leseAMKnapp;
+  forrigemkStatus = leseAMKnapp;
 
-  //AnsattKasse knapp
-  int leseAKKnapp = digitalRead(ansattKasse);
+  //Debounce trykkPlateAnsatt
+
+  int leseAKKnapp = digitalRead(trykkPlateAnsatt);
   
-  if (leseAKKnapp != forrigeAKStatus) {
-    akTid = millis();
+  if (leseAKKnapp != forrigetpaStatus) {
+    tpaTid = millis();
   }
   
-  if ((millis() - akTid) > debounceDelay) {
-    if (leseAKKnapp != akStatus) {
-      akStatus = leseAKKnapp;
-      if (akStatus == HIGH ) {
-        Serial.println("AnsattKasse har blitt klikket");
-        //vibrasjonsStatus == LOW;
-        digitalWrite(vibrasjonsMotor, LOW);
+  if ((millis() - tpaTid) > debounceDelay) {
+    if (leseAKKnapp != tpaStatus) {
+      tpaStatus = leseAKKnapp;
+      if (tpaStatus == HIGH ) {
+        digitalWrite(mottakerVibrasjon, LOW);
       }
     }
   }
   
-  forrigeAKStatus = leseAKKnapp;
+  forrigetpaStatus = leseAKKnapp;
 
-  //trykkPlate knapp
-  int leseTPKnapp = digitalRead(trykkPlate);
+  //Debounce trykkPlateKunde
+  int leseTPKnapp = digitalRead(trykkPlateKunde);
   
-  if (leseTPKnapp != forrigeTPStatus) {
-    tpTid = millis();
+  if (leseTPKnapp != forrigetpkStatus) {
+    tpkTid = millis();
   }
   
-  if ((millis() - tpTid) > trykkPlateDelay) {
-    if (leseTPKnapp != tpStatus) {
-      tpStatus = leseTPKnapp;
-      Serial.println("Trykkplate har blitt klikket");
-      digitalWrite(vibrasjonsMotor, tpStatus);
-      /*/vibrasjonsVeksling = tpStatus;
-      if (!tpStatus){
-        vibrasjonsVeksling = LOW;
-        digitalWrite(vibrasjonsMotor, LOW);
-      }/*/
+  if ((millis() - tpkTid) > trykkPlateKundeDelay) {
+    if (leseTPKnapp != tpkStatus) {
+      tpkStatus = leseTPKnapp;
+      digitalWrite(mottakerVibrasjon, tpkStatus);
     }
   }
   
-  forrigeTPStatus = leseTPKnapp;
-
-  //Vibrasjon
-  /*/if (vibrasjonsVeksling){
-    if (millis() - vmTid >= vibrasjonsInterval) {
-      // save the last time you blinked the LED
-      vmTid = millis();
-  
-      // if the LED is off turn it on and vice-versa:
-      vibrasjonsStatus = !vibrasjonsStatus;
-  
-      // set the LED with the ledState of the variable:
-      digitalWrite(vibrasjonsMotor, vibrasjonsStatus);
-    }
-  }/*/
+  forrigetpkStatus = leseTPKnapp;
 }
