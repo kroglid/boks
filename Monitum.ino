@@ -1,91 +1,119 @@
-const int trykkPlate = 4;
-const int vibrasjonsMotor = 13;
-const int ansattKasse = 2;
-const int ansattMobile = 12;
+const int trykkPlateKunde = 4; //Trykkplate forran kasse kobles her
+const int mottakerVibrasjon = 13; //Vibrasjonskablene fra mottakerne kobles her
+const int trykkPlateAnsatt = 2; //Trykkplate bak kasse kobles her
+const int mottakerKnapp = 12; //Knappene fra mottakerne kobles her
 
-int amStatus;
-int tpStatus;
-int akStatus;
-int forrigeAMStatus = LOW;
-int forrigeTPStatus = LOW;
-int forrigeAKStatus = LOW;
-unsigned long amTid = 0;
-unsigned long tpTid = 0;
-unsigned long akTid = 0;
-unsigned long vmTid = 0;
+//Lagrer tilstanden fra de forskjellige bryterne
+int mkTilstand;
+int tpkTilstand;
+int tpaTilstand;
 
-int vibrasjonsStatus = LOW;
-int vibrasjonsVeksling = LOW;
+//Lagrer tilstand til vibrasjonen
+int vibrasjonTilstand; 
 
-int vibrasjonsInterval = 500;
+//Lagrer sist kjente tilstand fra bryterne
+int forrigemkTilstand = LOW;
+int forrigetpkTilstand = LOW;
+int forrigetpaTilstand = LOW;
 
-unsigned long debounceDelay = 50;
+//Teller tiden siden bryterne ble trykket
+unsigned long mkTid = 0;
+unsigned long tpkTid = 0;
+unsigned long tpaTid = 0;
 
-unsigned long trykkPlateDelay = 3000;
+unsigned long debounceDelay = 50; //Lager en forsinkelse for å unngå feil klikk
+
+unsigned long trykkPlateKundeDelay = 3000; //Trykkplaten har et større delay
 
 void setup() {
-  pinMode(trykkPlate, INPUT);
-  pinMode(vibrasjonsMotor, OUTPUT);
-  pinMode(ansattKasse, INPUT);
-  pinMode(ansattMobile, INPUT);
-
-  Serial.begin(9600);
-}
-
-void ansattKnapper(){
-  
+  //Setter opp signalene
+  pinMode(trykkPlateKunde, INPUT);
+  pinMode(mottakerVibrasjon, OUTPUT);
+  pinMode(trykkPlateAnsatt, INPUT);
+  pinMode(mottakerKnapp, INPUT);
 }
 
 void loop() {
-  //ansattMobile knapp
-  int leseAMKnapp = digitalRead(ansattMobile);
-  
-  if (leseAMKnapp != forrigeAMStatus) {
-    amTid = millis();
+  //Debounce mottakerKnapp
+
+  //Leser tilstanden fra mottakerknappene
+  int leseAMKnapp = digitalRead(mottakerKnapp);
+
+  //Hvis bryteren endret, på grunn av støy eller trykk
+  if (leseAMKnapp != forrigemkTilstand) {
+
+    //Tilbakestill mottakerknappenes tid
+    mkTid = millis();
   }
-  
-  if ((millis() - amTid) > debounceDelay) {
-    if (leseAMKnapp != amStatus) {
-      amStatus = leseAMKnapp;
-      if (amStatus == HIGH) {
-        digitalWrite(vibrasjonsMotor, LOW);
+
+  //Vil gå videre hvis det har gått lenger tid enn debounce-forsinkelsen
+  if ((millis() - mkTid) > debounceDelay) {
+
+    //Hvis tilstanden har endret seg
+    if (leseAMKnapp != mkTilstand) {
+      mkTilstand = leseAMKnapp;
+
+      //Bare skift vibrasjonens tilstand hvis mottakerKnappen er HIGH
+      if (mkTilstand == HIGH) {
+        vibrasjonTilstand = LOW;
       }
     }
   }
-  
-  forrigeAMStatus = leseAMKnapp;
 
-  //AnsattKasse knapp
-  int leseAKKnapp = digitalRead(ansattKasse);
-  
-  if (leseAKKnapp != forrigeAKStatus) {
-    akTid = millis();
+  //Debounce trykkPlateAnsatt
+
+  //Leser tilstanden fra trykkPlateAnsatt
+  int leseTPAKnapp = digitalRead(trykkPlateAnsatt);
+
+  //Hvis bryteren endret, på grunn av støy eller trykk
+  if (leseTPAKnapp != forrigetpaTilstand) {
+
+    //Tilbakestill trykkPlateAnsatt tid
+    tpaTid = millis();
   }
-  
-  if ((millis() - akTid) > debounceDelay) {
-    if (leseAKKnapp != akStatus) {
-      akStatus = leseAKKnapp;
-      if (akStatus == HIGH ) {
-        digitalWrite(vibrasjonsMotor, LOW);
+
+  //Vil gå videre hvis det har gått lenger tid enn debounce-forsinkelsen
+  if ((millis() - tpaTid) > debounceDelay) {
+
+    //Hvis tilstanden har endret seg
+    if (leseTPAKnapp != tpaTilstand) {
+      tpaTilstand = leseTPAKnapp;
+
+      //Bare skift vibrasjonens tilstand hvis trykkPlateAnsatt er HIGH
+      if (tpaTilstand == HIGH ) {
+        vibrasjonTilstand = LOW;
       }
     }
   }
-  
-  forrigeAKStatus = leseAKKnapp;
 
-  //trykkPlate knapp
-  int leseTPKnapp = digitalRead(trykkPlate);
-  
-  if (leseTPKnapp != forrigeTPStatus) {
-    tpTid = millis();
+  //Debounce trykkPlateKunde
+
+  //Leser tilstanden fra trykkPlateKunde
+  int leseTPKnapp = digitalRead(trykkPlateKunde);
+
+  //Hvis bryteren endret, på grunn av støy eller trykk
+  if (leseTPKnapp != forrigetpkTilstand) {
+
+    //Tilbakestill trykkPlateKunde tid
+    tpkTid = millis();
   }
-  
-  if ((millis() - tpTid) > trykkPlateDelay) {
-    if (leseTPKnapp != tpStatus) {
-      tpStatus = leseTPKnapp;
-      digitalWrite(vibrasjonsMotor, tpStatus);
+
+  //Vil gå videre hvis det har gått lenger tid enn debounce-forsinkelsen
+  if ((millis() - tpkTid) > trykkPlateKundeDelay) {
+
+    //Hvis tilstanden har endret seg
+    if (leseTPKnapp != tpkTilstand) {
+      tpkTilstand = leseTPKnapp;
+      
+      //Vibrasjonen er på/av basert på om trykkplaten er trykket eller ikke
+      vibrasjonTilstand = tpkTilstand;
     }
   }
-  
-  forrigeTPStatus = leseTPKnapp;
+  //Lagrer lesningen
+  forrigemkTilstand = leseAMKnapp;
+  forrigetpaTilstand = leseTPAKnapp;
+  forrigetpkTilstand = leseTPKnapp;
+
+  //Sett vibrasjonen
+  digitalWrite(mottakerVibrasjon, vibrasjonTilstand);
 }
